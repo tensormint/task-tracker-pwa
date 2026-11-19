@@ -1,0 +1,19 @@
+{
+  "name": "Offline Task & Time Tracker",
+  "short_name": "TaskTracker",
+  "description": "100% Offline Progressive Web App for tracking daily tasks, study topics, and focus sessions.",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0f172a",
+  "theme_color": "#0f172a",
+  "icons": [
+    {
+      "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' rx='110' fill='%236366f1'/%3E%3Ccircle cx='256' cy='256' r='150' fill='none' stroke='%23ffffff' stroke-width='32'/%3E%3Cpolyline points='256,166 256,256 320,296' fill='none' stroke='%23ffffff' stroke-width='32' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E",
+      "sizes": "192x192 512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

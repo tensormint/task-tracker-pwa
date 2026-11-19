@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#f5f6f0">
+    <title>Productivity Task Manager PWA</title>
+    <link rel="stylesheet" href="CSS/style.css">
+    <link rel="manifest" href="manifest.json">
+</head>
+<body>
+    <!-- Toast Popup Container -->
+    <div id="toast-container" class="toast-container"></div>
+
+    <!-- Setup / Edit User Name Modal -->
+    <div id="profile-modal" class="modal-backdrop hidden">
+        <div class="modal-sheet profile-sheet">
+            <div class="modal-header">
+                <h3>Personalize Your App</h3>
+                <button id="close-profile-btn" class="icon-circle-btn sm" aria-label="Close">✕</button>
+            </div>
+            <p class="modal-subtext">Enter your name to customize your dashboard and avatar badge.</p>
+            
+            <div class="avatar-preview-wrap">
+                <div id="profile-avatar-preview" class="avatar-circle lg">U</div>
+            </div>
+
+            <form id="profile-form" class="profile-form">
+                <input type="text" id="profile-name-input" placeholder="Enter your name..." maxlength="24" required>
+                <button type="submit" class="pill-btn pill-emerald w-full">Save Name</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Notification Bell Modal -->
+    <div id="notification-modal" class="modal-backdrop hidden">
+        <div class="modal-sheet">
+            <div class="modal-header">
+                <h3>Notifications &amp; Activity</h3>
+                <button id="close-notif-btn" class="icon-circle-btn sm" aria-label="Close">✕</button>
+            </div>
+            <div id="notif-status-line" class="notif-status-pill">● 100% Offline Ready</div>
+            <ul id="notif-list" class="notif-list"></ul>
+        </div>
+    </div>
+
+    <!-- Monthly Progress Calendar Modal -->
+    <div id="calendar-modal" class="modal-backdrop hidden">
+        <div class="modal-sheet">
+            <div class="modal-header">
+                <h3 id="calendar-month-title">November 2026</h3>
+                <button id="close-calendar-btn" class="icon-circle-btn sm" aria-label="Close">✕</button>
+            </div>
+            <p class="modal-subtext">Green dates indicate active streak days with completed tasks or focus sessions.</p>
+            <div class="calendar-weekdays">
+                <span>Sun</span><span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span>
+            </div>
+            <div id="monthly-calendar-grid" class="monthly-grid"></div>
+        </div>
+    </div>
+
+    <div class="app-shell">
+        <!-- ==================== SCREEN 1: HOME VIEW ==================== -->
+        <main id="home-view" class="screen-view">
+            <!-- Top Profile Header -->
+            <header class="top-profile-bar">
+                <div class="profile-left">
+                    <div id="edit-profile-trigger" class="avatar-circle" title="Tap to edit name">
+                        <span id="user-avatar-initial">U</span>
+                    </div>
+                    <div class="profile-meta">
+                        <div id="edit-name-trigger" class="name-edit-row" title="Tap to edit name">
+                            <span id="user-display-name" class="user-name">Your Name</span>
+                            <span class="edit-pencil">✎</span>
+                        </div>
+                        <button type="button" class="streak-pill" id="streak-badge" title="View streak calendar">🔥 0 Day Streak</button>
+                    </div>
+                </div>
+                <button id="notif-bell-btn" class="icon-circle-btn" aria-label="Notifications">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+                        <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+                    </svg>
+                    <span id="notif-dot" class="notif-dot"></span>
+                </button>
+            </header>
+
+            <!-- Hero Heading -->
+            <section class="hero-section">
+                <h1>Start Your Day<br>&amp; Be Productive ✌️</h1>
+            </section>
+
+            <!-- Horizontal Goal / Task Progress Cards -->
+            <section class="carousel-section">
+                <div id="goal-cards-carousel" class="cards-carousel"></div>
+            </section>
+
+            <!-- My Current Task & Live Timer Section -->
+            <section class="current-task-section">
+                <div class="section-title-row">
+                    <h2>My Current Task</h2>
+                    <button id="quick-add-btn" class="text-action-btn">+ New Task</button>
+                </div>
+
+                <div class="current-task-card">
+                    <div class="current-tags-row">
+                        <div class="tag-group" id="active-tags-group">
+                            <span class="soft-pill">Focus</span>
+                            <span class="soft-pill">Offline</span>
+                        </div>
+                        <span class="time-stamp-label" id="active-schedule-label">Anytime</span>
+                    </div>
+
+                    <h3 id="active-task-title" class="current-title">Select a task to begin</h3>
+                    <p id="active-task-desc" class="current-desc">Tap any task card above or in your schedule to load it into the focus timer.</p>
+
+                    <div class="live-timer-box">
+                        <span class="timer-caption">SESSION TIMER</span>
+                        <div id="timer-clock" class="timer-digits">00:00:00</div>
+                    </div>
+
+                    <div class="current-footer-actions">
+                        <button id="start-timer-btn" class="pill-btn pill-emerald" disabled>Start</button>
+                        <button id="pause-timer-btn" class="pill-btn pill-sage" disabled>Pause</button>
+                        <button id="stop-timer-btn" class="pill-btn pill-dark" disabled>Finish &amp; Save</button>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <!-- ==================== SCREEN 2: SCHEDULE & CALENDAR VIEW ==================== -->
+        <section id="schedule-view" class="screen-view hidden">
+            <header class="sub-header-bar">
+                <button class="icon-circle-btn nav-back-home" aria-label="Back">←</button>
+                <button id="open-calendar-btn" class="month-picker-pill">
+                    <span>📅</span>
+                    <span id="current-month-label">Nov 2026</span>
+                </button>
+            </header>
+
+            <!-- Search Bar -->
+            <div class="search-box">
+                <span class="search-icon">🔍</span>
+                <input type="text" id="schedule-search-input" placeholder="Search your daily task...">
+            </div>
+
+            <!-- Horizontal Week Strip -->
+            <div id="week-strip" class="week-strip"></div>
+
+            <!-- Today Task Timeline -->
+            <div class="timeline-header">
+                <h2>My Today Task</h2>
+                <span id="today-task-count" class="coral-count-badge">00</span>
+            </div>
+
+            <div id="timeline-list" class="timeline-list"></div>
+        </section>
+
+        <!-- ==================== SCREEN 3: TASK DETAIL & CHECKLIST VIEW ==================== -->
+        <section id="detail-view" class="screen-view hidden">
+            <header class="sub-header-bar">
+                <button id="detail-back-btn" class="icon-circle-btn" aria-label="Back">←</button>
+                <div class="detail-header-actions">
+                    <button id="delete-task-btn" class="icon-circle-btn danger-icon" aria-label="Delete Task">🗑</button>
+                    <button id="save-detail-btn" class="pill-btn pill-forest">Save</button>
+                </div>
+            </header>
+
+            <!-- Task Title Input Box -->
+            <div class="detail-card">
+                <div class="detail-title-row">
+                    <div class="task-folder-icon">📋</div>
+                    <div class="detail-title-fields">
+                        <label for="detail-title-input">Task Title</label>
+                        <input type="text" id="detail-title-input" placeholder="Enter task title...">
+                    </div>
+                </div>
+                <div class="detail-meta-inputs">
+                    <input type="text" id="detail-category-input" placeholder="Category (e.g., Coding)">
+                    <input type="time" id="detail-time-input" value="09:30">
+                    <input type="date" id="detail-date-input">
+                </div>
+            </div>
+
+            <!-- Description Box -->
+            <div class="detail-section">
+                <label class="section-label" for="detail-desc-input">Description &amp; Notes</label>
+                <textarea id="detail-desc-input" rows="3" placeholder="Write task goals, syllabus notes, or key objectives..."></textarea>
+            </div>
+
+            <!-- Task Progress & Sub-Tasks Checklist -->
+            <div class="detail-section">
+                <div class="progress-summary-card">
+                    <div>
+                        <h3>Task Progress</h3>
+                        <p>Track and complete sub-tasks &amp; topics</p>
+                    </div>
+                    <div class="progress-ring-wrap" id="detail-progress-ring">
+                        <svg class="progress-ring" width="52" height="52">
+                            <circle class="ring-bg" cx="26" cy="26" r="21"></circle>
+                            <circle class="ring-fill" id="detail-ring-circle" cx="26" cy="26" r="21"></circle>
+                        </svg>
+                        <span id="detail-ring-text" class="ring-text">0%</span>
+                    </div>
+                </div>
+
+                <!-- Add Sub-Task / Topic Input -->
+                <div class="add-subtask-row">
+                    <input type="text" id="new-subtask-input" placeholder="Add topic or step (e.g., Task 1: Loops)...">
+                    <button type="button" id="add-subtask-btn" class="pill-btn pill-emerald sm">+ Add</button>
+                </div>
+
+                <!-- Sub-Tasks Checklist -->
+                <ul id="subtask-checklist" class="subtask-checklist"></ul>
+            </div>
+        </section>
+
+        <!-- ==================== SCREEN 4: HISTORY LOGS VIEW ==================== -->
+        <section id="history-view" class="screen-view hidden">
+            <header class="sub-header-bar">
+                <button class="icon-circle-btn nav-back-home" aria-label="Back">←</button>
+                <button id="clear-history-btn" class="pill-btn pill-sage sm">Clear Logs</button>
+            </header>
+
+            <section class="hero-section compact">
+                <h2>Focus History &amp; Logs</h2>
+                <p class="modal-subtext">Total time invested across your offline study and work sessions.</p>
+            </section>
+
+            <div class="stats-summary-grid">
+                <div class="stat-box">
+                    <span class="stat-label">TOTAL SESSIONS</span>
+                    <strong id="stat-total-sessions">0</strong>
+                </div>
+                <div class="stat-box">
+                    <span class="stat-label">TOTAL FOCUS TIME</span>
+                    <strong id="stat-total-time">0m</strong>
+                </div>
+            </div>
+
+            <ul id="history-logs-list" class="history-list"></ul>
+        </section>
+
+        <!-- Bottom Floating Navigation Bar -->
+        <nav class="bottom-dock">
+            <button class="dock-btn active" data-view="home-view">
+                <span class="dock-icon">🏠</span>
+                <span>Home</span>
+            </button>
+            <button class="dock-btn" data-view="schedule-view">
+                <span class="dock-icon">📅</span>
+                <span>Schedule</span>
+            </button>
+            <button class="dock-btn dock-create" id="dock-new-task-btn" aria-label="Create Task">
+                <span>+</span>
+            </button>
+            <button class="dock-btn" data-view="history-view">
+                <span class="dock-icon">⏱</span>
+                <span>History</span>
+            </button>
+        </nav>
+    </div>
+
+    <script src="js/store.js"></script>
+    <script src="js/timer.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>
